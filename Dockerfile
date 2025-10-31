@@ -1,16 +1,38 @@
-# Используем официальный образ Odoo 18
-FROM odoo:18.0
+# Используем официальный образ Python
+FROM python:3.10-slim
 
-# Устанавливаем зависимости (по желанию)
-USER root
+# Устанавливаем системные зависимости для Odoo и psycopg2
+RUN apt-get update && apt-get install -y \
+    git \
+    gcc \
+    g++ \
+    libpq-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libldap2-dev \
+    libsasl2-dev \
+    python3-dev \
+    libffi-dev \
+    wget \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создаём рабочую директорию
+WORKDIR /odoo
+
+# Копируем все файлы в контейнер
+COPY . .
+
+# Устанавливаем зависимости Python
+RUN pip3 install --upgrade pip setuptools wheel
 RUN pip3 install psycopg2-binary
+RUN pip3 install -r requirements.txt || true
 
-# Копируем entrypoint (если у тебя будет свой)
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Добавляем права на выполнение entrypoint.sh
+RUN chmod +x /odoo/entrypoint.sh
 
-# Переход на пользователя odoo
-USER odoo
+# Указываем порт
 EXPOSE 8069
-CMD ["odoo", "-d", "odoo", "--db_host", "db", "--db_user", "odoo", "--db_password", "odoo"]
 
+# Точка входа
+ENTRYPOINT ["/odoo/entrypoint.sh"]
