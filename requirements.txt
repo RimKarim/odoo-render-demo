@@ -1,0 +1,13 @@
+psycopg2-binary
+Werkzeug
+babel
+lxml
+pillow
+reportlab
+qrcode
+cryptography
+PyPDF2
+num2words
+python-dateutil
+decorator
+requests
